@@ -40,12 +40,13 @@ exports.calculateWeeklyStats = async (userId) => {
       else weeks[4].push(r);
     });
 
-    // 4. Dynamic Week Length (Prevents fake low scores before month ends)
+    // 4. Fixed Week Length (Encourages full 7-day consistency)
+    const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
     const weekDaysMax = [
-      Math.min(7, today),
-      today > 7 ? Math.min(7, today - 7) : 0,
-      today > 14 ? Math.min(7, today - 14) : 0,
-      today > 21 ? today - 21 : 0
+      7, // Week 1
+      7, // Week 2
+      7, // Week 3
+      totalDaysInMonth - 21 // Week 4 (Final stretch)
     ];
 
     // 5. Calculate Scores
@@ -69,7 +70,6 @@ exports.calculateWeeklyStats = async (userId) => {
     const averageScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / 4) : 0;
 
     // 6. Streak Timeline (Boolean array for every day in the month)
-    const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
     const streakTimeline = Array.from({ length: totalDaysInMonth }, (_, i) => {
       const dayNumeric = i + 1;
       if (dayNumeric > today) return null; // Future day

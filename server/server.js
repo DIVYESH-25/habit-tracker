@@ -4,16 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 
 // Connect Database
-connectDB().then(async () => {
-    // ONE-TIME MIGRATION: Delete legacy ISO date records (Prevent dupe-key collisions)
-    const DailyHabit = require('./models/DailyHabit');
-    await DailyHabit.deleteMany({ date: { $regex: /T/ } });
-    console.log('🧹 Legacy ISO records cleaned successfully.');
-
-    // Run idempotent seeder in the background
-    const { runAutoSeed } = require('./utils/seeder');
-    runAutoSeed().catch(err => console.error('Seeder background error:', err));
-});
+connectDB();
 
 const app = express();
 
