@@ -51,6 +51,13 @@ const Summary = () => {
     show: { opacity: 1, y: 0 }
   };
 
+  const getColor = (percentage) => {
+    if (percentage === null || percentage === undefined || percentage === 0) return 'bg-gray-800 border-gray-700 opacity-30';
+    if (percentage < 30) return 'bg-[#1e4d3a] border-[#1e4d3a]';
+    if (percentage < 70) return 'bg-[#00c978] shadow-[0_0_10px_rgba(0,201,120,0.4)]';
+    return 'bg-[#00FF9F] shadow-[0_0_20px_rgba(0,255,159,0.3)] text-[#0B0F14]';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0B0F14] flex items-center justify-center">
@@ -244,23 +251,30 @@ const Summary = () => {
               Month Timeline
             </h3>
             <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest">
-               <span className="flex items-center gap-2 text-[#00FF9F]"><div className="w-2 h-2 rounded-full bg-[#00FF9F] shadow-[0_0_10px_#00FF9F]" /> Success</span>
-               <span className="flex items-center gap-2 text-gray-400"><div className="w-2 h-2 rounded-full bg-gray-600" /> Missed</span>
+               <span className="text-gray-500 mr-2">Less</span>
+               <div className="flex gap-2">
+                 <div className="w-3 h-3 rounded-sm bg-gray-600" />
+                 <div className="w-3 h-3 rounded-sm bg-[#1e4d3a]" />
+                 <div className="w-3 h-3 rounded-sm bg-[#00c978]" />
+                 <div className="w-3 h-3 rounded-sm bg-[#00FF9F]" />
+               </div>
+               <span className="text-gray-500 ml-2">More</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 md:gap-3">
-            {summary?.streakTimeline?.map((success, i) => (
+            {summary?.streakTimeline?.map((percentage, i) => (
               <motion.div 
                 key={i}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.3, delay: i * 0.02 }}
-                className={`flex-1 min-w-[30px] h-10 md:h-12 rounded-xl transition-all duration-300 relative group
-                  ${success === null ? 'bg-white/5 border border-white/5' : 
-                    success ? 'bg-[#00FF9F] shadow-[0_0_20px_rgba(0,255,159,0.2)]' : 'bg-gray-800 border border-white/5'}
+                className={`flex-1 min-w-[30px] h-10 md:h-12 rounded-xl transition-all duration-300 relative group flex items-center justify-center
+                  ${getColor(percentage)}
                 `}
               >
-                 <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-[#0B0F14] opacity-30 group-hover:opacity-100 transition-opacity">
+                 <div className={`text-[10px] font-black transition-opacity ${
+                   percentage >= 70 ? 'text-[#0B0F14]' : 'text-gray-400'
+                 }`}>
                    {i + 1}
                  </div>
               </motion.div>

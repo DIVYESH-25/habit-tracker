@@ -12,8 +12,8 @@ exports.generateSmartInsights = (weeklyBreakdown, averageScore) => {
       } else if (curr < prev) {
         messages.push(`Performance dropped in Week ${i + 1} by ${prev - curr}%`);
       }
-    } else if (curr > 0 && prev === 0 && i === 1) {
-       messages.push(`Week 2 momentum is building at ${curr}%!`);
+    } else if (curr > 0 && prev === 0) {
+       messages.push(`Week ${i + 1} momentum is building at ${curr}%!`);
     }
   }
 
@@ -22,9 +22,11 @@ exports.generateSmartInsights = (weeklyBreakdown, averageScore) => {
 
   // 2. Status Engine
   const getStatus = (avg) => {
-    if (avg > 80) return "🔥 On Fire";
-    if (avg >= 60) return "👍 Good";
-    return "⚠️ Needs Work";
+    if (avg >= 85) return "🔥 Elite";
+    if (avg >= 70) return "👍 Strong";
+    if (avg >= 50) return "💪 Growing";
+    if (avg >= 30) return "⚠️ Needs Work";
+    return "❌ Critical";
   };
 
   return {
@@ -34,3 +36,4 @@ exports.generateSmartInsights = (weeklyBreakdown, averageScore) => {
     allInsights: messages
   };
 };
+

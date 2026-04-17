@@ -22,14 +22,20 @@ const Heatmap = ({ heatmapResponse }) => {
       
       <div className="flex flex-wrap gap-2 md:gap-3 justify-start">
         {data.map((item) => {
-          const dateObj = new Date(item.date);
+          // Manually parse YYYY-MM-DD to avoid timezone shift from new Date()
+          const [y, m, d] = item.date.split('-').map(Number);
+          const dateObj = new Date(y, m - 1, d);
           const formattedDate = dateObj.toLocaleDateString('default', { month: 'long', day: 'numeric' });
           
           return (
             <div key={item.date} className="relative group">
               <div 
-                className={`w-6 h-6 md:w-8 md:h-8 rounded-[4px] border border-transparent transition-all duration-300 hover:scale-110 cursor-pointer ${getColor(item.completionPercentage)}`}
-              ></div>
+                className={`w-6 h-6 md:w-8 md:h-8 rounded-[4px] border border-transparent transition-all duration-300 hover:scale-110 cursor-pointer flex items-center justify-center text-[10px] font-bold ${getColor(item.completionPercentage)} ${
+                  item.completionPercentage >= 70 ? 'text-black/80' : 'text-gray-400'
+                }`}
+              >
+                {d}
+              </div>
               
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-black text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20 border border-glassBorder shadow-2xl">

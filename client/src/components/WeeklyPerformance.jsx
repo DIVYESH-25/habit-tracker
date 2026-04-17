@@ -3,7 +3,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 
 import { motion } from 'framer-motion';
 
 const WeeklyPerformance = ({ data }) => {
-  if (!data || data.length === 0 || data.every(w => w.score === 0)) {
+  if (!data || data.length === 0) {
     return (
       <div className="h-64 flex items-center justify-center border border-dashed border-white/10 rounded-3xl">
         <p className="text-gray-500 font-medium">No activity yet — start tracking to unlock analytics</p>

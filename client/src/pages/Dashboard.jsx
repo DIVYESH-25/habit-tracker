@@ -203,8 +203,9 @@ const Dashboard = () => {
                </div>
 
                <p className="mt-6 text-sm text-gray-400 text-center">
-                 {habits.length === 0 ? 'Add habits to see progress' :
-                  completionPercentage >= 70 ? '🎉 Streak secured for today!' : 'Reach 70% to continue your streak.'}
+                 {habits.length === 0 ? 'Set your first targets to start' :
+                  completionPercentage >= 70 ? '🎉 SUCCESSFUL DAY secured!' : 
+                   completionPercentage > 0 ? '⚡ Progress tracked. Reach 70% to hit Success.' : 'No activity yet for today.'}
                </p>
              </div>
           </div>

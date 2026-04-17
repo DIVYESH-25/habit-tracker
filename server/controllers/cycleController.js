@@ -1,46 +1,34 @@
-const Streak = require('../models/Streak');
-const monthlyAnalyticsService = require('../services/monthlyAnalyticsService');
+const analyticsCore = require('../services/analyticsCore');
 const insightService = require('../services/insightService');
-const MonthlySummary = require('../models/MonthlySummary');
 const YearlySummary = require('../models/YearlySummary');
 
 exports.getSummary = async (req, res) => {
-  console.log('--- EXECUTING NEW getSummary CONTROLLER ---');
-  // Default Safe Response as requested
-  const defaultResponse = {
-    completionRate: 0,
-    successfulDays: 0,
-    bestStreak: 0,
-    consistencyScore: 0,
-    weeklyBreakdown: [0, 0, 0, 0],
-    comparison: null,
-    insightMessage: "Start tracking your habits today!",
-    milestone: null
-  };
-
   try {
     const userId = req.user.id;
     
-    // Get Live Stats for current month
-    const liveStats = await monthlyAnalyticsService.getLiveAnalytics(userId);
-    const streakData = await Streak.findOne({ userId });
-    const currentStreak = streakData ? streakData.currentStreak : 0;
+    // 1. Get Core Stats (Unified)
+    const stats = await analyticsCore.getCoreStats(userId);
     
-    if (!liveStats) {
-      return res.json(defaultResponse);
-    }
-
-    const { insightMessage, milestone } = insightService.generateInsights(liveStats, currentStreak);
+    // 2. Generate Insights (using common logic)
+    const insights = insightService.generateSmartInsights(stats.weeklyBreakdown, stats.consistencyScore);
     
+    // 3. Construct unified response
+    // Ensuring field names match what Summary.jsx expects
     res.json({
-      ...liveStats,
-      currentStreak,
-      insightMessage,
-      milestone
+      consistencyScore: stats.consistencyScore,
+      totalSuccessful: stats.successfulDays,
+      currentDay: stats.today,
+      totalDays: stats.totalDays,
+      weeklyBreakdown: stats.weeklyBreakdown,
+      comparison: stats.comparison,
+      currentStreak: stats.currentStreak,
+      insight: insights.insight,
+      milestone: stats.consistencyScore >= 80 ? "Elite" : stats.consistencyScore >= 60 ? "Rising" : "Novice",
+      streakTimeline: stats.streakTimeline
     });
   } catch (err) {
     console.error('Summary API Error:', err.message);
-    res.status(500).json({ message: "Server error", ...defaultResponse });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -64,3 +52,4 @@ exports.getYearlySummary = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+

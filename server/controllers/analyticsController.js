@@ -1,35 +1,40 @@
-const weeklyAnalyticsService = require('../services/weeklyAnalyticsService');
+const analyticsCore = require('../services/analyticsCore');
 const insightService = require('../services/insightService');
 const disciplineScoreService = require('../services/disciplineScoreService');
+const DailyHabit = require('../models/DailyHabit');
+const Streak = require('../models/Streak');
+const MonthlySummary = require('../models/MonthlySummary');
 
 exports.getMonthlyAnalytics = async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // 1. Get Weekly Stats
-    const stats = await weeklyAnalyticsService.calculateWeeklyStats(userId);
+    // 1. Get Core Stats (Unified)
+    const stats = await analyticsCore.getCoreStats(userId);
     
     // 2. Generate Insights based on those stats
-    const insights = insightService.generateSmartInsights(stats.weeklyBreakdown, stats.averageScore);
+    const insights = insightService.generateSmartInsights(stats.weeklyBreakdown, stats.consistencyScore);
     
-    // 3. Calculate Real Comparison (Month over Month)
-    const comparison = await weeklyAnalyticsService.calculateMonthComparison(userId, stats.averageScore);
-    
+    // 3. Determine best/worst week
+    const bestWeek = stats.weeklyBreakdown.reduce((a, b) => (a.score > b.score ? a : b)).week;
+    const worstWeek = stats.weeklyBreakdown.reduce((a, b) => (a.score < b.score ? a : b)).week;
+
     // 4. Combine and return
     res.json({
       weeklyBreakdown: stats.weeklyBreakdown,
       insight: insights.insight,
-      consistencyScore: stats.averageScore,
+      consistencyScore: stats.consistencyScore,
       status: insights.status,
       consistencyMessage: insights.consistencyMessage,
-      totalSuccessful: stats.totalSuccessful,
-      currentDay: stats.currentDay,
+      totalSuccessful: stats.successfulDays,
+      currentDay: stats.today,
       totalDays: stats.totalDays,
-      bestWeek: stats.bestWeek,
-      worstWeek: stats.worstWeek,
+      bestWeek: bestWeek,
+      worstWeek: worstWeek,
       streakTimeline: stats.streakTimeline,
-      comparison: comparison,
-      milestone: stats.averageScore >= 80 ? "Elite" : stats.averageScore >= 60 ? "Rising" : "Novice"
+      comparison: stats.comparison,
+      hasAnyActivity: stats.hasAnyActivity,
+      milestone: stats.consistencyScore >= 80 ? "Elite" : stats.consistencyScore >= 60 ? "Rising" : "Novice"
     });
   } catch (err) {
     console.error('Analytics Controller Error:', err.message);
@@ -48,18 +53,47 @@ exports.getDisciplineScore = async (req, res) => {
   }
 };
 
+exports.hardReset = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(`[AUTH] hardReset triggered for user ${userId}`);
+
+    // 1. Delete all habit records
+    await DailyHabit.deleteMany({ userId });
+    
+    // 2. Delete all summaries
+    await MonthlySummary.deleteMany({ userId });
+
+    // 3. Reset streak
+    await Streak.findOneAndUpdate(
+      { userId },
+      { 
+        $set: { 
+          currentStreak: 0, 
+          longestStreak: 0, 
+          lastCompletedDate: null,
+          startDate: new Date().toLocaleDateString('en-CA')
+        } 
+      },
+      { upsert: true }
+    );
+
+    res.json({ message: "Discipline matrix reset successfully. You now have a clean slate." });
+  } catch (err) {
+    console.error('Hard Reset Error:', err.message);
+    res.status(500).json({ error: "Failed to reset data." });
+  }
+};
+
 exports.debugUserData = async (req, res) => {
   try {
     const userId = req.user.id;
-    const DailyHabit = require('../models/DailyHabit');
-    const Streak = require('../models/Streak');
     const Habit = require('../models/Habit');
 
     const habits = await DailyHabit.find({ userId }).sort({ date: -1 });
     const streak = await Streak.findOne({ userId });
     const targetDefs = await Habit.find({ userId });
 
-    // Calculate duplicates for debug
     const dateMap = new Map();
     habits.forEach(h => {
       dateMap.set(h.date, (dateMap.get(h.date) || 0) + 1);
@@ -78,10 +112,10 @@ exports.debugUserData = async (req, res) => {
       streakRecord: streak,
       targetsCount: targetDefs.length,
       sampleHabits: habits.slice(0, 5),
-      currentSystemDate: new Date().toLocaleDateString('en-CA'),
-      currentLocalDate: new Date().toLocaleDateString('en-CA')
+      currentSystemDate: new Date().toLocaleDateString('en-CA')
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+

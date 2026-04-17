@@ -190,7 +190,27 @@ const ManageTargets = ({ isOpen, onClose, onUpdate }) => {
               )}
             </div>
 
-            <p className="mt-8 text-center text-xs text-white/20">
+            <div className="mt-8 pt-6 border-t border-white/5">
+              <button 
+                onClick={async () => {
+                  if (window.confirm('⚠️ CRITICAL ACTION: This will permanently delete ALL historical data, streaks, and analytics for your account. This cannot be undone. Proceed?')) {
+                    try {
+                      await api.post('/analytics/hard-reset');
+                      alert('Discipline Matrix Reset. Starting fresh.');
+                      onUpdate();
+                      onClose();
+                    } catch (err) {
+                      setError('Failed to reset matrix');
+                    }
+                  }
+                }}
+                className="w-full py-3 rounded-2xl border border-red-500/20 text-red-500/50 hover:text-red-500 hover:bg-red-500/5 text-xs font-bold uppercase tracking-widest transition-all"
+              >
+                Hard Reset Discipline Matrix
+              </button>
+            </div>
+
+            <p className="mt-6 text-center text-xs text-white/20">
               Max 10 active targets allowed.
             </p>
           </div>
@@ -201,3 +221,4 @@ const ManageTargets = ({ isOpen, onClose, onUpdate }) => {
 };
 
 export default ManageTargets;
+

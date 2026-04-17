@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Flame, Award } from 'lucide-react';
 
 const SmartPanel = ({ data }) => {
-  if (!data || !data.insight || data.consistencyScore === 0) {
+  if (!data || !data.hasAnyActivity) {
     return (
       <div className="flex-1 flex flex-col justify-center space-y-6">
         <div className="p-6 bg-white/5 rounded-3xl border border-dashed border-white/10 text-center">
-          <p className="text-gray-500 font-medium">No insights yet — complete habits to unlock</p>
+          <p className="text-gray-500 font-medium">No activity yet — complete habits to unlock insights</p>
         </div>
       </div>
     );

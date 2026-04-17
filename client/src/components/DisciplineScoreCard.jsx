@@ -12,12 +12,12 @@ const DisciplineScoreCard = ({ data, loading }) => {
     );
   }
 
-  if (!data || data.disciplineScore === 0) {
+  if (!data || (!data.hasAnyActivity && data.disciplineScore === 0)) {
     return (
       <div className="glass-panel p-8 text-center flex flex-col items-center justify-center min-h-[350px]">
         <Target className="w-12 h-12 text-gray-600 mb-4" />
         <h3 className="text-white font-bold text-xl mb-2">Discipline Engine Idle</h3>
-        <p className="text-gray-500 max-w-[200px]">Start tracking your habits to generate your Discipline Score.</p>
+        <p className="text-gray-500 max-w-[200px]">Start tracking your habits to activate the Discipline Matrix.</p>
       </div>
     );
   }
@@ -71,9 +71,19 @@ const DisciplineScoreCard = ({ data, loading }) => {
           </div>
         </div>
 
-        {/* Status Badge */}
-        <div className={`px-6 py-1.5 rounded-full border text-xs font-black uppercase tracking-[0.2em] mb-8 shadow-xl ${getStatusColor(status)}`}>
-           {status}
+        {/* Status Badges */}
+        <div className="flex gap-3 mb-8">
+          <div className={`px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] shadow-xl ${
+            data.activityStatus === "active" ? "text-[#00FF9F] border-[#00FF9F]/20 bg-[#00FF9F]/5" :
+            data.activityStatus === "in_progress" ? "text-blue-400 border-blue-400/20 bg-blue-400/5" :
+            "text-gray-500 border-white/5 bg-white/5"
+          }`}>
+            {data.activityStatus === "active" ? "Successful Day" : 
+             data.activityStatus === "in_progress" ? "In Progress" : "No Activity"}
+          </div>
+          <div className={`px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-[0.2em] shadow-xl ${getStatusColor(status)}`}>
+            {status}
+          </div>
         </div>
 
         {/* Breakdown Bars */}
