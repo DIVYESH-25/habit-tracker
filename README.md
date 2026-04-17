@@ -2,7 +2,6 @@
 
 A production-grade, deterministic habit tracking application designed for high-performance individuals. Built on the MERN stack with a focus on behavioral psychology and data-driven discipline scoring.
 
-![Banner](https://images.unsplash.com/photo-1506784911325-180766981440?q=80&w=2670&auto=format&fit=crop)
 
 ## 🎯 The Core Philosophy
 Unlike standard habit trackers that focus on simple binary streaks, **Discipline Matrix** treats discipline as a multi-layer behavioral metric. The system distinguishes between raw engagement (Activity) and quantitative achievement (Success), providing a realistic view of your growth.
@@ -103,5 +102,4 @@ DisciplineScore = (monthConsistency * 0.5) + (streakScore * 0.3) + (momentumScor
 
 ---
 
-## 🛡️ License
-Distributed under the ISC License. See `LICENSE` for more information.
+
